@@ -1,0 +1,176 @@
+
+      <div class="product-management-dashboard">
+        <header class="dashboard-header">
+          <h1>Shopify Product Ecosystem Management</h1>
+        </header>
+        
+        <div class="dashboard-content">
+          <nav class="dashboard-nav">
+            
+      <div class="nav-item active" data-section="products">
+        <div class="nav-label">Products</div>
+        <div class="nav-count">25</div>
+      </div>
+    
+            
+      <div class="nav-item " data-section="collections">
+        <div class="nav-label">Collections</div>
+        <div class="nav-count">8</div>
+      </div>
+    
+            
+      <div class="nav-item " data-section="inventory">
+        <div class="nav-label">Inventory</div>
+        <div class="nav-count">42</div>
+      </div>
+    
+            
+      <div class="nav-item " data-section="content">
+        <div class="nav-label">Content</div>
+        <div class="nav-count">17</div>
+      </div>
+    
+            
+      <div class="nav-item " data-section="metaobjects">
+        <div class="nav-label">Metaobjects</div>
+        <div class="nav-count">3</div>
+      </div>
+    
+            
+      <div class="nav-item " data-section="files">
+        <div class="nav-label">Files</div>
+        <div class="nav-count">18</div>
+      </div>
+    
+            
+      <div class="nav-item " data-section="menus">
+        <div class="nav-label">Menus</div>
+        <div class="nav-count">4</div>
+      </div>
+    
+          </nav>
+          
+          <main class="dashboard-main">
+            <div class="section-header">
+              <h2>Products</h2>
+              <div class="section-actions">
+                <button class="create-button">Create Product</button>
+                <button class="refresh-button">Refresh</button>
+              </div>
+            </div>
+            
+            <div class="section-content">
+              <!-- Content will be loaded dynamically based on active section -->
+              <div class="loading-placeholder">Loading Products...</div>
+            </div>
+          </main>
+        </div>
+      </div>
+      
+      <style>
+        .product-management-dashboard {
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+          max-width: 1200px;
+          margin: 0 auto;
+          padding: 20px;
+          color: #333;
+        }
+        
+        .dashboard-header {
+          margin-bottom: 20px;
+          padding-bottom: 10px;
+          border-bottom: 1px solid #eee;
+        }
+        
+        .dashboard-content {
+          display: flex;
+          gap: 20px;
+        }
+        
+        .dashboard-nav {
+          width: 200px;
+          background-color: #f9fafb;
+          border-radius: 8px;
+          padding: 15px;
+          box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        .nav-item {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 10px;
+          margin-bottom: 5px;
+          border-radius: 4px;
+          cursor: pointer;
+          transition: background-color 0.2s;
+        }
+        
+        .nav-item:hover {
+          background-color: #f1f1f1;
+        }
+        
+        .nav-item.active {
+          background-color: #5c6ac4;
+          color: white;
+        }
+        
+        .nav-count {
+          background-color: rgba(0,0,0,0.1);
+          border-radius: 10px;
+          padding: 2px 8px;
+          font-size: 12px;
+        }
+        
+        .nav-item.active .nav-count {
+          background-color: rgba(255,255,255,0.2);
+        }
+        
+        .dashboard-main {
+          flex: 1;
+          background-color: #fff;
+          border-radius: 8px;
+          padding: 20px;
+          box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        .section-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 20px;
+          padding-bottom: 10px;
+          border-bottom: 1px solid #eee;
+        }
+        
+        .section-actions {
+          display: flex;
+          gap: 10px;
+        }
+        
+        .create-button {
+          background-color: #5c6ac4;
+          color: white;
+          border: none;
+          padding: 8px 15px;
+          border-radius: 4px;
+          cursor: pointer;
+        }
+        
+        .refresh-button {
+          background-color: #f4f6f8;
+          border: 1px solid #ddd;
+          padding: 8px 15px;
+          border-radius: 4px;
+          cursor: pointer;
+        }
+        
+        .loading-placeholder {
+          padding: 40px;
+          text-align: center;
+          color: #637381;
+          background-color: #f9fafb;
+          border-radius: 4px;
+        }
+      </style>
+    
