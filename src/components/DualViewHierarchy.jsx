@@ -15,6 +15,7 @@ import '../styles/dualView.css';
 const DualViewHierarchy = ({ title, data, initialView = 'presentation' }) => {
   const [viewMode, setViewMode] = useState(initialView);
   const [expandedNodes, setExpandedNodes] = useState({});
+  const [selectedNode, setSelectedNode] = useState(null);
 
   // Toggle between presentation and raw data views
   const toggleView = (mode) => {
@@ -84,6 +85,12 @@ const DualViewHierarchy = ({ title, data, initialView = 'presentation' }) => {
     // Determine the prefix for children
     const childPrefix = level === 0 ? '' : `${prefix}${isLast ? '    ' : `${verticalLine}   `}`;
     
+    // Handler for node selection (not expand/collapse)
+    const handleNodeSelect = (e) => {
+      e.stopPropagation();
+      setSelectedNode(node);
+    };
+
     return (
       <div key={nodeId} className="tree-node">
         <div className="flex items-start">
@@ -91,20 +98,24 @@ const DualViewHierarchy = ({ title, data, initialView = 'presentation' }) => {
             {linePrefix}
           </div>
           <div className="flex-1">
-            <span 
-              className={`cursor-pointer ${hasChildren ? 'font-medium' : ''}`}
-              onClick={() => {
-                if (hasChildren) {
-                  toggleNode(nodeId);
-                }
-              }}
-            >
+            <span className={`cursor-pointer ${hasChildren ? 'font-medium' : ''}`}>
               {hasChildren && (
-                <span className={`expand-icon ${isExpanded ? 'expanded' : ''}`}>
+                <span
+                  className={`expand-icon ${isExpanded ? 'expanded' : ''}`}
+                  onClick={e => {
+                    e.stopPropagation();
+                    toggleNode(nodeId);
+                  }}
+                  style={{ marginRight: 4 }}
+                >
                   {isExpanded ? '▼' : '▶'}
                 </span>
               )}
-              <span className={`${getNodeTypeClass(node.type)}`}>
+              <span
+                className={`${getNodeTypeClass(node.type)}`}
+                onClick={handleNodeSelect}
+                style={{ userSelect: 'none' }}
+              >
                 {node.name || node.id || 'Unnamed Node'}
               </span>
               {node.type && (
@@ -118,10 +129,10 @@ const DualViewHierarchy = ({ title, data, initialView = 'presentation' }) => {
         
         {hasChildren && isExpanded && (
           <div className="ml-4">
-            {node.children.map((child, index) => 
+            {node.children.map((child, index) =>
               renderTreeNode(
-                child, 
-                level + 1, 
+                child,
+                level + 1,
                 index === node.children.length - 1,
                 childPrefix
               )
@@ -139,7 +150,7 @@ const DualViewHierarchy = ({ title, data, initialView = 'presentation' }) => {
           <h3 className="text-lg font-semibold">{title}</h3>
         </div>
       )}
-
+  
       <div className="border-b border-gray-200 dark:border-gray-700">
         <div className="flex justify-between items-center px-6 py-3">
           <div className="flex space-x-2">
@@ -156,7 +167,7 @@ const DualViewHierarchy = ({ title, data, initialView = 'presentation' }) => {
               Raw Data
             </button>
           </div>
-
+  
           {viewMode === 'presentation' && (
             <div className="flex space-x-2">
               <button
@@ -173,7 +184,7 @@ const DualViewHierarchy = ({ title, data, initialView = 'presentation' }) => {
               </button>
             </div>
           )}
-
+  
           {viewMode === 'raw' && (
             <button
               onClick={() => {
@@ -187,7 +198,7 @@ const DualViewHierarchy = ({ title, data, initialView = 'presentation' }) => {
           )}
         </div>
       </div>
-
+  
       <div className="dual-view-content">
         {viewMode === 'presentation' ? (
           <div className="font-mono">
@@ -201,6 +212,42 @@ const DualViewHierarchy = ({ title, data, initialView = 'presentation' }) => {
           </div>
         )}
       </div>
+
+      {/* Detail Card for Selected Node */}
+      {selectedNode && (
+        <div className="detail-card-container mt-6">
+          <div className="detail-card bg-white dark:bg-gray-800 shadow-lg rounded-lg p-6 border border-gray-200 dark:border-gray-700">
+            <div className="flex justify-between items-center mb-4">
+              <h4 className="text-md font-bold">
+                Details for: {selectedNode.name || selectedNode.id}
+              </h4>
+              <button
+                className="close-detail-card text-gray-500 hover:text-red-500"
+                onClick={() => setSelectedNode(null)}
+                aria-label="Close"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="flex flex-col md:flex-row gap-6">
+              <div className="flex-1">
+                <div className="font-mono text-sm mb-2 font-semibold">Presentation View</div>
+                <div className="font-mono border rounded p-2 bg-gray-50 dark:bg-gray-900">
+                  {renderTreeNode(selectedNode)}
+                </div>
+              </div>
+              <div className="flex-1">
+                <div className="font-mono text-sm mb-2 font-semibold">Raw Data View</div>
+                <div className="raw-data-view border rounded p-2 bg-gray-50 dark:bg-gray-900">
+                  <pre className="text-xs">
+                    {JSON.stringify(selectedNode, null, 2)}
+                  </pre>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
