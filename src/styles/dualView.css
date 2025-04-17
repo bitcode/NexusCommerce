@@ -1,5 +1,5 @@
 /* Dual View Hierarchy Styles */
-
+/* Ayu color palette integration for both dark and light modes */
 /* Tree node styles */
 .tree-node {
   padding: 2px 0;
@@ -7,11 +7,11 @@
 }
 
 .tree-node:hover {
-  background-color: rgba(0, 0, 0, 0.05);
+  background-color: #F8F9FA; /* Ayu lightMode.ui.bg */
 }
 
 .dark .tree-node:hover {
-  background-color: rgba(255, 255, 255, 0.05);
+  background-color: #11151C; /* Ayu darkMode.ui.line */
 }
 
 /* ASCII tree styles */
@@ -22,33 +22,33 @@
 
 /* Node type colors */
 .node-type-root {
-  color: #0284c7; /* blue-600 */
+  color: #39BAE6; /* Ayu tag */
 }
 
 .dark .node-type-root {
-  color: #38bdf8; /* blue-400 */
+  color: #39BAE6; /* Ayu tag */
 }
 
 .node-type-category,
 .node-type-collection,
 .node-type-group,
 .node-type-folder {
-  color: #059669; /* emerald-600 */
+  color: #FFB454; /* Ayu func */
 }
 
 .dark .node-type-category,
 .dark .node-type-collection,
 .dark .node-type-group,
 .dark .node-type-folder {
-  color: #34d399; /* emerald-400 */
+  color: #FFB454; /* Ayu func */
 }
 
 .node-type-product {
-  color: #d97706; /* amber-600 */
+  color: #59C2FF; /* Ayu entity */
 }
 
 .dark .node-type-product {
-  color: #fbbf24; /* amber-400 */
+  color: #59C2FF; /* Ayu entity */
 }
 
 .node-type-variant,
@@ -56,7 +56,7 @@
 .node-type-detail,
 .node-type-stat,
 .node-type-alert {
-  color: #6b7280; /* gray-500 */
+  color: #AAD94C; /* Ayu string */
 }
 
 .dark .node-type-variant,
@@ -64,7 +64,7 @@
 .dark .node-type-detail,
 .dark .node-type-stat,
 .dark .node-type-alert {
-  color: #9ca3af; /* gray-400 */
+  color: #AAD94C; /* Ayu string */
 }
 
 /* Expand/collapse icons */
@@ -85,13 +85,13 @@
 
 /* Raw data view */
 .raw-data-view {
-  background-color: #f9fafb; /* gray-50 */
+  background-color: #FCFCFC; /* Ayu lightMode.editor.bg */
   border-radius: 0.375rem;
   overflow: auto;
 }
 
 .dark .raw-data-view {
-  background-color: #1f2937; /* gray-800 */
+  background-color: #0D1017; /* Ayu darkMode.editor.bg */
 }
 
 .raw-data-view pre {
@@ -114,26 +114,28 @@
 }
 
 .view-toggle-button.active {
-  background-color: #2563eb; /* blue-600 */
-  color: white;
+  background-color: #E6B450; /* Ayu accent */
+  color: #0B0E14; /* Ayu darkMode.ui.bg */
 }
 
 .view-toggle-button:not(.active) {
-  background-color: #e5e7eb; /* gray-200 */
-  color: #1f2937; /* gray-800 */
+  background-color: #F8F9FA; /* Ayu lightMode.ui.bg */
+  color: #565B66; /* Ayu darkMode.ui.fg */
 }
 
 .dark .view-toggle-button:not(.active) {
-  background-color: #374151; /* gray-700 */
-  color: #f9fafb; /* gray-50 */
+  background-color: #0B0E14; /* Ayu darkMode.ui.bg */
+  color: #BFBDB6; /* Ayu darkMode.editor.fg */
 }
 
 .view-toggle-button:not(.active):hover {
-  background-color: #d1d5db; /* gray-300 */
+  background-color: #E6B450; /* Ayu accent */
+  color: #0B0E14;
 }
 
 .dark .view-toggle-button:not(.active):hover {
-  background-color: #4b5563; /* gray-600 */
+  background-color: #E6B450; /* Ayu accent */
+  color: #0B0E14;
 }
 
 /* Control buttons */
@@ -142,45 +144,49 @@
   border-radius: 0.375rem;
   font-size: 0.875rem;
   font-weight: 500;
-  background-color: #e5e7eb; /* gray-200 */
-  color: #1f2937; /* gray-800 */
+  background-color: #F8F9FA; /* Ayu lightMode.ui.bg */
+  color: #565B66; /* Ayu darkMode.ui.fg */
   transition: all 0.2s ease;
 }
 
 .dark .control-button {
-  background-color: #374151; /* gray-700 */
-  color: #f9fafb; /* gray-50 */
+  background-color: #0B0E14; /* Ayu darkMode.ui.bg */
+  color: #BFBDB6; /* Ayu darkMode.editor.fg */
 }
 
 .control-button:hover {
-  background-color: #d1d5db; /* gray-300 */
+  background-color: #E6B450; /* Ayu accent */
+  color: #0B0E14;
 }
 
 .dark .control-button:hover {
-  background-color: #4b5563; /* gray-600 */
+  background-color: #E6B450; /* Ayu accent */
+  color: #0B0E14;
 }
 
 /* Dual view container */
 .dual-view-container {
-  border: 1px solid #e5e7eb; /* gray-200 */
+  border: 1px solid #F8F9FA; /* Ayu lightMode.ui.bg */
   border-radius: 0.5rem;
   overflow: hidden;
+  background-color: #FCFCFC; /* Ayu lightMode.editor.bg */
 }
 
 .dark .dual-view-container {
-  border-color: #374151; /* gray-700 */
+  border-color: #0B0E14; /* Ayu darkMode.ui.bg */
+  background-color: #0D1017; /* Ayu darkMode.editor.bg */
 }
 
 /* Dual view header */
 .dual-view-header {
   padding: 0.75rem 1.5rem;
-  border-bottom: 1px solid #e5e7eb; /* gray-200 */
-  background-color: #f9fafb; /* gray-50 */
+  border-bottom: 1px solid #F8F9FA; /* Ayu lightMode.ui.bg */
+  background-color: #F8F9FA; /* Ayu lightMode.ui.bg */
 }
 
 .dark .dual-view-header {
-  border-color: #374151; /* gray-700 */
-  background-color: #1f2937; /* gray-800 */
+  border-color: #0B0E14; /* Ayu darkMode.ui.bg */
+  background-color: #0B0E14; /* Ayu darkMode.ui.bg */
 }
 
 /* Dual view content */
@@ -188,4 +194,9 @@
   max-height: 600px;
   overflow: auto;
   padding: 1.5rem;
+  color: #565B66; /* Ayu darkMode.ui.fg */
+}
+
+.dark .dual-view-content {
+  color: #BFBDB6; /* Ayu darkMode.editor.fg */
 }
