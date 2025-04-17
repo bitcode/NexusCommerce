@@ -108,7 +108,7 @@ const sampleHierarchy = {
   ]
 };
 
-function App() {
+function MainApp() {
   // State for product detail view
   const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
   const navigate = useNavigate();
@@ -385,4 +385,4 @@ function App() {
   );
 }
 
-export default App;
+export default MainApp;

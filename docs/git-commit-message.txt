@@ -1,0 +1,15 @@
+Refactor: Implement React Router for declarative routing
+
+This commit refactors the application's navigation and view rendering logic to use `react-router-dom` v6 features instead of manual state management.
+
+Key changes include:
+
+- Replaced the `activeView` state and `changeView` function in `App.tsx` with `react-router-dom`'s `useLocation` and `useNavigate` hooks.
+- Replaced the conditional `renderContent` function and `switch` statement with declarative `<Routes>` and `<Route>` components within `App.tsx`.
+- The currently active view/route is now determined directly from `location.pathname`.
+- Navigation logic (product selection, button clicks, nav items) now uses `Maps()` directly.
+- Removed the wrapper component `AppWithRouter` from `index.tsx`. The `BrowserRouter` now wraps the `App` component directly in `index.tsx`, and layout/navigation responsibilities are fully handled within `App.tsx`.
+- Updated logging to reflect the use of URL paths (`location.pathname`) instead of the internal `activeView` state.
+- Removed redundant `try...catch` blocks around simple `Maps` calls.
+- Removed the "Debug Navigation" section from the home page component.
+- Added an import for `dualView.css` in `src/styles/index.css`.

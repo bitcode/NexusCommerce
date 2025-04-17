@@ -3,6 +3,9 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Import custom styles */
+@import './dualView.css';
+
 /* Custom styles */
 @layer base {
   body {
