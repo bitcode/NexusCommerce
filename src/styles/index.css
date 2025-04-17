@@ -1,0 +1,66 @@
+/* Tailwind CSS directives */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom styles */
+@layer base {
+  body {
+    @apply antialiased;
+    @apply dark:bg-dark-bg dark:text-dark-fg bg-light-bg text-light-fg;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-bold;
+  }
+
+  h1 {
+    @apply text-2xl md:text-3xl;
+  }
+
+  h2 {
+    @apply text-xl md:text-2xl;
+  }
+
+  a {
+    @apply dark:text-dark-syntax-entity text-light-syntax-entity hover:underline;
+  }
+
+  code {
+    @apply font-mono dark:bg-dark-editor bg-light-editor p-1 rounded;
+  }
+}
+
+@layer components {
+  .app {
+    @apply max-w-7xl mx-auto p-4 md:p-6;
+  }
+
+  .app-header {
+    @apply text-center mb-10;
+  }
+
+  .store-logo {
+    @apply max-w-[200px] mt-5 mx-auto;
+  }
+
+  .loading {
+    @apply flex justify-center items-center min-h-[200px];
+  }
+
+  .error {
+    @apply dark:text-dark-error text-light-error border dark:border-dark-error border-light-error p-4 rounded-md my-5;
+  }
+
+  .btn {
+    @apply px-4 py-2 rounded-md font-medium transition-colors;
+  }
+
+  .btn-primary {
+    @apply btn dark:bg-dark-accent bg-light-accent dark:text-dark-bg text-light-bg hover:opacity-90;
+  }
+
+  .btn-secondary {
+    @apply btn dark:bg-dark-editor bg-light-editor dark:text-dark-fg text-light-fg hover:opacity-90;
+  }
+}

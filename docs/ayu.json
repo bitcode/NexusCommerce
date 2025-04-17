@@ -1,0 +1,201 @@
+{
+    "darkMode": {
+      "base_colors": {
+        "ui": "#0B0E14",
+        "editor": "#0D1017"
+      },
+      "syntax": {
+        "tag": "#39BAE6",
+        "func": "#FFB454",
+        "entity": "#59C2FF",
+        "string": "#AAD94C",
+        "regexp": "#95E6CB",
+        "markup": "#F07178",
+        "keyword": "#FF8F40",
+        "special": "#E6B673",
+        "comment": {
+          "hex": "#ACB6BF",
+          "alpha": 0.55
+        },
+        "constant": "#D2A6FF",
+        "operator": "#F29668"
+      },
+      "vcs": {
+        "added": "#7FD962",
+        "modified": "#73B8FF",
+        "removed": "#F26D78"
+      },
+      "editor": {
+        "fg": "#BFBDB6",
+        "bg": "#0D1017",
+        "line": "#131721",
+        "selection": {
+          "active": {
+            "hex": "#409FFF",
+            "alpha": 0.3
+          },
+          "inactive": {
+            "hex": "#409FFF",
+            "alpha": 0.13
+          }
+        },
+        "findMatch": {
+          "active": "#6C5980",
+          "inactive": {
+            "hex": "#6C5980",
+            "alpha": 0.4
+          }
+        },
+        "gutter": {
+          "active": {
+            "hex": "#6C7380",
+            "alpha": 0.9
+          },
+          "normal": {
+            "hex": "#6C7380",
+            "alpha": 0.6
+          }
+        },
+        "indentGuide": {
+          "active": {
+            "hex": "#6C7380",
+            "alpha": 0.5
+          },
+          "normal": {
+            "hex": "#6C7380",
+            "alpha": 0.2
+          }
+        }
+      },
+      "ui": {
+        "fg": "#565B66",
+        "bg": "#0B0E14",
+        "line": "#11151C",
+        "selection": {
+          "active": {
+            "hex": "#475266",
+            "alpha": 0.25
+          },
+          "normal": {
+            "hex": "#475266",
+            "alpha": 0.2
+          }
+        },
+        "panel": {
+          "bg": "#0F131A",
+          "shadow": {
+            "hex": "#000000",
+            "alpha": 0.5
+          }
+        }
+      },
+      "common": {
+        "accent": "#E6B450",
+        "error": "#D95757"
+      }
+    },
+    "lightMode": {
+      "base_colors": {
+        "ui": "#F8F9FA",
+        "editor": "#FCFCFC"
+      },
+      "syntax": {
+        "tag": "#55B4D4",
+        "func": "#F2AE49",
+        "entity": "#399EE6",
+        "string": "#86B300",
+        "regexp": "#4CBF99",
+        "markup": "#F07171",
+        "keyword": "#FA8D3E",
+        "special": "#E6BA7E",
+        "comment": {
+          "hex": "#787B80",
+          "alpha": 0.6
+        },
+        "constant": "#A37ACC",
+        "operator": "#ED9366"
+      },
+      "vcs": {
+        "added": "#6CBF43",
+        "modified": "#478ACC",
+        "removed": "#FF7383"
+      },
+      "editor": {
+        "fg": "#5C6166",
+        "bg": "#FCFCFC",
+        "line": {
+          "hex": "#8A9199",
+          "alpha": 0.1
+        },
+        "selection": {
+          "active": {
+            "hex": "#035BD6",
+            "alpha": 0.15
+          },
+          "inactive": {
+            "hex": "#035BD6",
+            "alpha": 0.07
+          }
+        },
+        "findMatch": {
+          "active": {
+            "hex": "#9F40FF",
+            "alpha": 0.17
+          },
+          "inactive": {
+            "hex": "#9F40FF",
+            "alpha": 0.8
+          }
+        },
+        "gutter": {
+          "active": {
+            "hex": "#8A9199",
+            "alpha": 0.8
+          },
+          "normal": {
+            "hex": "#8A9199",
+            "alpha": 0.4
+          }
+        },
+        "indentGuide": {
+          "active": {
+            "hex": "#8A9199",
+            "alpha": 0.35
+          },
+          "normal": {
+            "hex": "#8A9199",
+            "alpha": 0.18
+          }
+        }
+      },
+      "ui": {
+        "fg": "#8A9199",
+        "bg": "#F8F9FA",
+        "line": {
+          "hex": "#6B7D8F",
+          "alpha": 0.12
+        },
+        "selection": {
+          "active": {
+            "hex": "#56728F",
+            "alpha": 0.12
+          },
+          "normal": {
+            "hex": "#6B7D8F",
+            "alpha": 0.12
+          }
+        },
+        "panel": {
+          "bg": "#F3F4F5",
+          "shadow": {
+            "hex": "#000000",
+            "alpha": 0.15
+          }
+        }
+      },
+      "common": {
+        "accent": "#FFAA33",
+        "error": "#E65050"
+      }
+    }
+  }

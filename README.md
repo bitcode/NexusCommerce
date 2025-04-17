@@ -8,45 +8,44 @@ A modern application for efficient management and visualization of Shopify store
 
 This project aims to provide a powerful alternative to the standard Shopify admin interface, focusing on rapid, bulk, and visual data management for store owners, developers, and managers. By exclusively utilizing the Shopify Admin GraphQL API, the application enables tailored data operations and dynamic visualization of store relationships (e.g., Products, Collections, Customers, Orders) through automatically generated Mermaid diagrams.
 
-**Why?**  
+**Why?**
 The default Shopify UI can be cumbersome for complex or bulk operations and lacks advanced visualization of data relationships. This app addresses those gaps with a streamlined interface and unique diagramming features.
 
 ---
 
 ## Key Features
 
-- **GraphQL-Driven Data Management:**  
+- **GraphQL-Driven Data Management:**
   Full Create, Read, Update, and Delete (CRUD) operations for Products, Variants, Collections, Customers, Orders, and Inventory, all via the Shopify Admin GraphQL API.
 
-- **Dynamic Mermaid Visualizations:**  
+- **Dynamic Mermaid Visualizations:**
   Automatic generation and rendering of Mermaid diagrams (Entity Relationship Diagrams, Class Diagrams) to illustrate the structure and relationships within your Shopify store.
 
-- **Efficient Bulk Operations:**  
+- **Efficient Bulk Operations:**
   Support for Shopify's Bulk Operations API for high-volume data processing.
 
-- **Authentication:**  
+- **Authentication:**
   Secure access via Shopify Admin API Access Token (for personal use) with a modular design to support OAuth for multi-store management in the future.
 
-- **Pagination, Filtering, and Caching:**  
+- **Pagination, Filtering, and Caching:**
   Handles large datasets with cursor-based pagination, advanced filtering, and caching for performance.
 
-- **Robust Error and Rate Limit Handling:**  
+- **Robust Error and Rate Limit Handling:**
   Adaptive strategies for Shopify's query cost-based rate limiting, with user feedback and retry logic.
 
-- **Extensible Architecture:**  
+- **Extensible Architecture:**
   Designed for maintainability and future expansion, including multi-client support.
 
 ---
 
 ## Technology Stack
 
-- **Frontend:** React or Vue.js (web app), or Electron (desktop app)
+- **Frontend:** React + TypeScript with Apollo Client
 - **Backend/API:** Node.js (preferred for full-stack JS) or Python (alternative)
-- **GraphQL Client:**  
-  - Node.js: `@shopify/shopify-api`, `graphql-request`, `urql`, `Apollo Client`  
-  - Python: `gql`, `sgqlc`, `Qlient`
+- **GraphQL Client:**
+  - Apollo Client with `@defer` support for Shopify Storefront API
 - **Visualization:** `mermaid.js` for rendering diagrams
-- **Other:**  
+- **Other:**
   - Electron (if desktop app)
   - Standard web development tools (npm, yarn, etc.)
 
@@ -58,7 +57,7 @@ The default Shopify UI can be cumbersome for complex or bulk operations and lack
 
 - Node.js (v16+ recommended) or Python 3.8+ (if using Python backend)
 - npm or yarn (for JS projects)
-- Shopify store with Admin API access
+- Shopify store with Storefront API access
 
 ### Installation
 
@@ -74,8 +73,8 @@ The default Shopify UI can be cumbersome for complex or bulk operations and lack
    yarn install
    ```
 3. **Configure Shopify API credentials:**
-   - For personal use, create a Custom App in your Shopify admin and obtain the Admin API Access Token.
-   - Set the token in your environment variables or configuration file as instructed in `/docs/getting-started.md`.
+   - Create a Custom App in your Shopify admin and obtain the Storefront API Access Token.
+   - Copy `.env.example` to `.env.local` and update with your Shopify credentials.
 
 4. **Start the application:**
    ```bash
@@ -83,6 +82,46 @@ The default Shopify UI can be cumbersome for complex or bulk operations and lack
    # or
    yarn start
    ```
+
+---
+
+## Apollo Client Integration
+
+This project uses Apollo Client for GraphQL queries with the following features:
+
+- **Native `@defer` Support**: Incremental loading of data for better user experience
+- **Error Handling**: Comprehensive error handling with retry logic
+- **Caching**: Efficient caching with type policies for pagination
+- **Custom Hooks**: Simplified query hooks for Shopify Storefront API
+
+### Example Usage
+
+```typescript
+import { useShopifyQuery } from './apollo/useShopifyQuery';
+import { gql } from '@apollo/client';
+
+const PRODUCTS_QUERY = gql`
+  query GetProducts($first: Int!) {
+    products(first: $first) {
+      edges {
+        node {
+          id
+          title
+          # ... other fields
+        }
+      }
+    }
+  }
+`;
+
+function ProductList() {
+  const { loading, error, data } = useShopifyQuery(PRODUCTS_QUERY, {
+    variables: { first: 10 }
+  });
+
+  // Use the data...
+}
+```
 
 ---
 
@@ -134,6 +173,8 @@ This project is licensed under the MIT License. See [LICENSE](./LICENSE) for det
 
 ## References
 
+- Shopify Storefront API Documentation: https://shopify.dev/docs/api/storefront
 - Shopify Admin GraphQL API Documentation: https://shopify.dev/docs/api/admin-graphql
+- Apollo Client Documentation: https://www.apollographql.com/docs/react/
 - Mermaid.js Documentation: https://mermaid-js.github.io/
 - See `Shopify GraphQL Data Management Plan_Initial_Research.md` for detailed research, technical rationale, and works cited.

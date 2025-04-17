@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nexus Commerce UI Components</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            dark: {
+              bg: '#0B0E14',
+              editor: '#0D1017',
+              fg: '#BFBDB6',
+              accent: '#E6B450',
+              error: '#D95757',
+              syntax: {
+                tag: '#39BAE6',
+                func: '#FFB454',
+                entity: '#59C2FF',
+                string: '#AAD94C',
+                regexp: '#95E6CB',
+                markup: '#F07178',
+                keyword: '#FF8F40',
+                special: '#E6B673',
+                constant: '#D2A6FF',
+                operator: '#F29668'
+              }
+            },
+            light: {
+              bg: '#F8F9FA',
+              editor: '#FCFCFC',
+              fg: '#5C6166',
+              accent: '#FFAA33',
+              error: '#E65050',
+              syntax: {
+                tag: '#55B4D4',
+                func: '#F2AE49',
+                entity: '#399EE6',
+                string: '#86B300',
+                regexp: '#4CBF99',
+                markup: '#F07171',
+                keyword: '#FA8D3E',
+                special: '#E6BA7E',
+                constant: '#A37ACC',
+                operator: '#ED9366'
+              }
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Apply dark mode by default */
+    html {
+      @apply dark;
+    }
+    body {
+      @apply antialiased dark:bg-dark-bg dark:text-dark-fg bg-light-bg text-light-fg;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      @apply font-bold;
+    }
+    h1 {
+      @apply text-2xl md:text-3xl;
+    }
+    h2 {
+      @apply text-xl md:text-2xl;
+    }
+    a {
+      @apply dark:text-dark-syntax-entity text-light-syntax-entity hover:underline;
+    }
+    code {
+      @apply font-mono dark:bg-dark-editor bg-light-editor p-1 rounded;
+    }
+    .btn {
+      @apply px-4 py-2 rounded-md font-medium transition-colors;
+    }
+    .btn-primary {
+      @apply btn dark:bg-dark-accent bg-light-accent dark:text-dark-bg text-light-bg hover:opacity-90;
+    }
+    .btn-secondary {
+      @apply btn dark:bg-dark-editor bg-light-editor dark:text-dark-fg text-light-fg hover:opacity-90;
+    }
+    .btn-outline {
+      @apply btn border dark:border-dark-syntax-entity border-light-syntax-entity dark:text-dark-syntax-entity text-light-syntax-entity hover:opacity-90;
+    }
+    .card {
+      @apply bg-light-editor dark:bg-dark-editor rounded-lg shadow-md overflow-hidden;
+    }
+    .card-header {
+      @apply px-6 py-4 border-b border-light-ui dark:border-dark-ui flex justify-between items-center;
+    }
+    .card-body {
+      @apply p-6;
+    }
+    .card-footer {
+      @apply px-6 py-4 border-t border-light-ui dark:border-dark-ui bg-light-bg dark:bg-dark-bg bg-opacity-50 dark:bg-opacity-50;
+    }
+  </style>
+</head>
+<body>
+  <div class="min-h-screen p-8">
+    <header class="flex justify-between items-center mb-8">
+      <h1 class="text-3xl font-bold">Nexus Commerce UI Components</h1>
+      <button id="theme-toggle" class="p-2 rounded-full transition-colors duration-200 focus:outline-none">
+        <svg id="sun-icon" class="w-6 h-6 text-yellow-300 hidden" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+          <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd"></path>
+        </svg>
+        <svg id="moon-icon" class="w-6 h-6 text-gray-700" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+          <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
+        </svg>
+      </button>
+    </header>
+
+    <section class="mb-12">
+      <h2 class="text-2xl font-bold mb-4">Buttons</h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+          <h3 class="text-lg font-semibold mb-2">Primary</h3>
+          <div class="space-y-2">
+            <button class="btn-primary text-sm px-3 py-1.5">Small Button</button>
+            <button class="btn-primary">Medium Button</button>
+            <button class="btn-primary text-lg px-6 py-3">Large Button</button>
+          </div>
+        </div>
+        <div>
+          <h3 class="text-lg font-semibold mb-2">Secondary</h3>
+          <div class="space-y-2">
+            <button class="btn-secondary text-sm px-3 py-1.5">Small Button</button>
+            <button class="btn-secondary">Medium Button</button>
+            <button class="btn-secondary text-lg px-6 py-3">Large Button</button>
+          </div>
+        </div>
+        <div>
+          <h3 class="text-lg font-semibold mb-2">Outline</h3>
+          <div class="space-y-2">
+            <button class="btn-outline text-sm px-3 py-1.5">Small Button</button>
+            <button class="btn-outline">Medium Button</button>
+            <button class="btn-outline text-lg px-6 py-3">Large Button</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="mb-12">
+      <h2 class="text-2xl font-bold mb-4">Cards</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="card">
+          <div class="card-header">
+            <h3 class="text-lg font-semibold">Basic Card</h3>
+          </div>
+          <div class="card-body">
+            <p>This is a basic card with a title.</p>
+          </div>
+        </div>
+        
+        <div class="card">
+          <div class="card-header">
+            <h3 class="text-lg font-semibold">Card with Footer</h3>
+          </div>
+          <div class="card-body">
+            <p>This card has a footer with an action button.</p>
+          </div>
+          <div class="card-footer">
+            <div class="flex justify-end">
+              <button class="btn-primary">Action</button>
+            </div>
+          </div>
+        </div>
+        
+        <div class="card">
+          <div class="card-header">
+            <h3 class="text-lg font-semibold">Card with Header Action</h3>
+            <button class="btn-outline text-sm px-3 py-1.5">Edit</button>
+          </div>
+          <div class="card-body">
+            <p>This card has a header action button.</p>
+          </div>
+        </div>
+        
+        <div class="card">
+          <div class="card-body">
+            <p>This is a card without a title.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="mb-12">
+      <h2 class="text-2xl font-bold mb-4">Navigation</h2>
+      <nav class="bg-light-bg dark:bg-dark-bg shadow-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div class="flex justify-between h-16">
+            <div class="flex">
+              <div class="flex-shrink-0 flex items-center">
+                <span class="text-xl font-bold text-light-syntax-entity dark:text-dark-syntax-entity">
+                  Nexus Commerce
+                </span>
+              </div>
+              <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
+                <a href="#" class="inline-flex items-center px-1 pt-1 border-b-2 border-light-accent dark:border-dark-accent text-light-syntax-entity dark:text-dark-syntax-entity">
+                  Home
+                </a>
+                <a href="#" class="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-light-fg dark:text-dark-fg hover:text-light-syntax-entity dark:hover:text-dark-syntax-entity">
+                  Products
+                </a>
+                <a href="#" class="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-light-fg dark:text-dark-fg hover:text-light-syntax-entity dark:hover:text-dark-syntax-entity">
+                  Collections
+                </a>
+                <a href="#" class="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-light-fg dark:text-dark-fg hover:text-light-syntax-entity dark:hover:text-dark-syntax-entity">
+                  About
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </section>
+
+    <section class="mb-12">
+      <h2 class="text-2xl font-bold mb-4">Product Card Example</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <div class="card h-full flex flex-col transition-transform hover:scale-[1.02]">
+          <div class="cursor-pointer">
+            <div class="relative pb-[100%] mb-4 bg-light-ui dark:bg-dark-ui rounded overflow-hidden">
+              <img
+                src="https://via.placeholder.com/300"
+                alt="Product Image"
+                class="absolute inset-0 w-full h-full object-cover"
+              />
+            </div>
+            <div class="card-body">
+              <h3 class="text-lg font-medium mb-1">Sample Product</h3>
+              <p class="text-sm text-light-fg dark:text-dark-fg opacity-75 mb-2 line-clamp-2">
+                This is a sample product description that might be a bit longer to demonstrate how it would look.
+              </p>
+              <div class="mt-auto flex justify-between items-center">
+                <div class="font-bold">
+                  $99.99
+                </div>
+                <div class="text-sm text-green-600 dark:text-green-400">
+                  In stock
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    // Theme toggle functionality
+    const themeToggle = document.getElementById('theme-toggle');
+    const sunIcon = document.getElementById('sun-icon');
+    const moonIcon = document.getElementById('moon-icon');
+    
+    // Check initial theme
+    if (document.documentElement.classList.contains('dark')) {
+      sunIcon.classList.remove('hidden');
+      moonIcon.classList.add('hidden');
+    } else {
+      sunIcon.classList.add('hidden');
+      moonIcon.classList.remove('hidden');
+    }
+    
+    themeToggle.addEventListener('click', () => {
+      document.documentElement.classList.toggle('dark');
+      sunIcon.classList.toggle('hidden');
+      moonIcon.classList.toggle('hidden');
+      
+      // Save theme preference
+      const isDark = document.documentElement.classList.contains('dark');
+      localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    });
+  </script>
+</body>
+</html>
