@@ -12,6 +12,8 @@ import { StateManager, CacheConfig, RefreshPolicy, DataCategory, StateRequestOpt
 import { MutationManager } from './MutationManager';
 import { ValidationService, ValidationResult, ValidationError } from './ValidationService';
 import { DataOperations } from './DataOperations';
+import { ConfigManager, ConfigManagerOptions } from './ConfigManager';
+import { ShopifyConfig } from './types/ShopifyConfig';
 import { 
   ShopifyResourceType, 
   ReadOptions, 
@@ -56,6 +58,11 @@ export {
   ValidationError,
   DataOperations,
   
+  // Configuration exports
+  ConfigManager,
+  ConfigManagerOptions,
+  ShopifyConfig,
+  
   // Resource Types exports
   ShopifyResourceType,
   ReadOptions,
@@ -66,18 +73,64 @@ export {
 };
 
 export interface ShopifyMonitorOptions {
-  shop: string;
-  accessToken: string;
+  /**
+   * Shopify store domain (e.g., 'your-store.myshopify.com')
+   * Can be loaded from environment via ConfigManager if not provided
+   */
+  shop?: string;
+  
+  /**
+   * Shopify access token for API authentication
+   * Can be loaded from environment via ConfigManager if not provided
+   */
+  accessToken?: string;
+  
+  /**
+   * Shopify API version (e.g., '2025-04')
+   * Can be loaded from environment via ConfigManager if not provided
+   */
   apiVersion?: string;
+  
+  /**
+   * Shopify plan type (affects rate limits)
+   * Can be loaded from environment via ConfigManager if not provided
+   */
   plan?: ShopifyPlan;
+  
+  /**
+   * Analytics configuration options
+   */
   analytics?: UsageAnalyticsOptions;
+  
+  /**
+   * Notification system configuration options
+   */
   notifications?: NotificationSystemOptions;
+  
+  /**
+   * Plan configuration options
+   */
   planConfig?: PlanConfigOptions;
+  
+  /**
+   * State manager configuration options
+   */
   stateManager?: {
     defaultTTL?: number;
     maxEntries?: number;
     persistCache?: boolean;
     sanitizeData?: boolean;
+  };
+  
+  /**
+   * Configuration manager options
+   */
+  configManager?: ConfigManagerOptions & {
+    /**
+     * Whether to use environment variables
+     * @default true
+     */
+    useEnvConfig?: boolean;
   };
 }
 
@@ -89,6 +142,7 @@ export interface ShopifyMonitor {
   stateManager: StateManager;
   mutationManager: MutationManager;
   dataOperations: DataOperations;
+  configManager: ConfigManager;
   
   // Convenience methods for data operations
   query: <T>(document: string, variables?: any, options?: Partial<StateRequestOptions>) => Promise<T>;
@@ -103,6 +157,11 @@ export interface ShopifyMonitor {
  * wired together for real-time rate limit tracking, analytics, and notifications.
  */
 export function createShopifyMonitor(options: ShopifyMonitorOptions): ShopifyMonitor {
+  // Initialize ConfigManager if custom options are provided
+  const configManager = options.configManager 
+    ? ConfigManager.getInstance(options.configManager)
+    : ConfigManager.getInstance();
+  
   // Initialize components
   const analytics = new UsageAnalytics(options.analytics);
   const notifications = new NotificationSystem(options.notifications);
@@ -110,7 +169,7 @@ export function createShopifyMonitor(options: ShopifyMonitorOptions): ShopifyMon
   // Initialize plan config with callback to notify on plan changes
   const planConfig = new PlanConfig({
     ...options.planConfig,
-    initialPlan: options.plan,
+    initialPlan: options.plan || (configManager.get('plan') as ShopifyPlan),
     onPlanChange: (plan, limits) => {
       notifications.notifyPlanChanged(plan, limits);
     },
@@ -122,6 +181,7 @@ export function createShopifyMonitor(options: ShopifyMonitorOptions): ShopifyMon
     accessToken: options.accessToken,
     apiVersion: options.apiVersion,
     plan: planConfig.getCurrentPlan(),
+    useEnvConfig: options.configManager?.useEnvConfig !== false,
     onRateLimitApproaching: (status: ShopifyThrottleStatus) => {
       // Calculate percentage used
       const percentageUsed = 100 - (status.currentlyAvailable / status.maximumAvailable * 100);
@@ -185,6 +245,7 @@ export function createShopifyMonitor(options: ShopifyMonitorOptions): ShopifyMon
     stateManager,
     mutationManager,
     dataOperations,
+    configManager,
     
     // Convenience methods
     query: <T>(document: string, variables?: any, options?: Partial<StateRequestOptions>) => 

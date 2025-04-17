@@ -3,32 +3,64 @@
  * 
  * This example demonstrates how to use the StateManager for efficient
  * API request caching and data privacy in a Shopify application.
+ * 
+ * The StateManager can be configured either through direct options
+ * or through environment variables in the .env file.
  */
 
 // Add Node.js type declarations
 declare const require: any;
 declare const module: { main?: any };
 
-import { createShopifyMonitor, RefreshPolicy, DataCategory } from '../src';
+import { createShopifyMonitor, RefreshPolicy, DataCategory, ConfigManager } from '../src';
 
-// Replace these values with your actual Shopify store details
-const SHOP = 'your-store.myshopify.com';
-const ACCESS_TOKEN = 'your-admin-api-access-token';
+// Example 1: Using environment variables from .env file
+// Make sure you have the following in your .env file:
+// STATE_MANAGER_DEFAULT_TTL=300000
+// STATE_MANAGER_MAX_ENTRIES=1000
+// STATE_MANAGER_PERSIST_CACHE=true
+// STATE_MANAGER_STORAGE_KEY=shopify-api-state-cache
+// STATE_MANAGER_SANITIZE_DATA=true
+// STATE_MANAGER_CONFIG_TTL=86400000
+// STATE_MANAGER_OPERATIONAL_TTL=300000
+// STATE_MANAGER_ANALYTICS_TTL=3600000
+// STATE_MANAGER_TEMPORARY_TTL=60000
+
+// Initialize ConfigManager to load environment variables
+ConfigManager.getInstance({
+  envPath: '.env', // Path to your .env file
+  environment: process.env.NODE_ENV // Optional: 'development', 'production', etc.
+});
 
 // Create the monitor with all components including StateManager
-const monitor = createShopifyMonitor({
-  shop: SHOP,
-  accessToken: ACCESS_TOKEN,
-  plan: 'standard',
+// The StateManager will use environment variables from .env file
+const monitorWithEnvConfig = createShopifyMonitor({
+  // These can be loaded from environment variables too via ConfigManager
+  shop: process.env.SHOPIFY_SHOP || 'your-store.myshopify.com',
+  accessToken: process.env.SHOPIFY_ACCESS_TOKEN || 'your-admin-api-access-token',
+  plan: (process.env.SHOPIFY_PLAN as any) || 'standard',
   
-  // Configure StateManager
+  // StateManager will use environment variables by default
+  // No need to specify stateManager options unless you want to override
+});
+
+// Example 2: Using direct configuration (overrides environment variables)
+const monitorWithDirectConfig = createShopifyMonitor({
+  shop: process.env.SHOPIFY_SHOP || 'your-store.myshopify.com',
+  accessToken: process.env.SHOPIFY_ACCESS_TOKEN || 'your-admin-api-access-token',
+  plan: (process.env.SHOPIFY_PLAN as any) || 'standard',
+  
+  // Configure StateManager directly (overrides environment variables)
   stateManager: {
-    defaultTTL: 300000, // 5 minutes default cache TTL
-    maxEntries: 1000,   // Maximum cache entries
+    defaultTTL: 600000, // 10 minutes default cache TTL (overrides env var)
+    maxEntries: 2000,   // Maximum cache entries (overrides env var)
     persistCache: true, // Persist cache to localStorage
     sanitizeData: true, // Automatically sanitize sensitive data
   },
 });
+
+// Use the monitor with environment variables for this example
+const monitor = monitorWithEnvConfig;
 
 // Example: Fetch products with caching
 async function fetchProductsWithCaching() {
@@ -167,9 +199,23 @@ function invalidateProductCache() {
   displayCacheStats();
 }
 
+// Example: Display current environment configuration
+function displayEnvironmentConfig() {
+  console.log('\n--- Environment Configuration ---');
+  console.log(`STATE_MANAGER_DEFAULT_TTL: ${process.env.STATE_MANAGER_DEFAULT_TTL || '(not set)'}`);
+  console.log(`STATE_MANAGER_MAX_ENTRIES: ${process.env.STATE_MANAGER_MAX_ENTRIES || '(not set)'}`);
+  console.log(`STATE_MANAGER_PERSIST_CACHE: ${process.env.STATE_MANAGER_PERSIST_CACHE || '(not set)'}`);
+  console.log(`STATE_MANAGER_STORAGE_KEY: ${process.env.STATE_MANAGER_STORAGE_KEY || '(not set)'}`);
+  console.log(`STATE_MANAGER_SANITIZE_DATA: ${process.env.STATE_MANAGER_SANITIZE_DATA || '(not set)'}`);
+  console.log('-------------------------\n');
+}
+
 // Run the example
 async function runExample() {
   console.log('Starting Shopify API State Management example...');
+  
+  // Display environment configuration
+  displayEnvironmentConfig();
   
   // Fetch products with caching
   await fetchProductsWithCaching();
@@ -195,6 +241,7 @@ export {
   fetchProductsWithCaching, 
   fetchInventoryLevels, 
   displayCacheStats, 
-  invalidateProductCache, 
+  invalidateProductCache,
+  displayEnvironmentConfig,
   runExample 
 };

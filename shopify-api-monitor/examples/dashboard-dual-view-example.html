@@ -1,0 +1,1121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Product Management Dashboard with Dual-View</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f6f8;
+    }
+    
+    .container {
+      padding: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container" id="dashboard-container">
+    <!-- Dashboard will be rendered here -->
+    <div class="loading">Loading dashboard...</div>
+  </div>
+  
+  <!-- Include D3.js -->
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  
+  <!-- Include dashboard charts example -->
+  <script src="dashboard-charts-example.js"></script>
+  
+  <script>
+    // Mock API client for demonstration purposes
+    class MockShopifyApiClient {
+      async request(query) {
+        console.log('API request:', query);
+        
+        // Simulate API response delay
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        // Return mock data
+        return {
+          data: {
+            products: { totalCount: 25 },
+            collections: { totalCount: 8 },
+            locations: { totalCount: 3 },
+            pages: { totalCount: 12 },
+            blogs: { 
+              edges: [{ node: { articles: { totalCount: 15 } } }],
+              totalCount: 1
+            },
+            metaobjectDefinitions: { totalCount: 5 },
+            files: { totalCount: 30 },
+            menus: { totalCount: 4 },
+            shop: { inventoryItems: { totalCount: 75 } }
+          }
+        };
+      }
+    }
+    
+    // Mock StateManager for demonstration purposes
+    class MockStateManager {
+      constructor() {
+        this.state = new Map();
+      }
+      
+      get(key) {
+        return this.state.get(key);
+      }
+      
+      set(key, value) {
+        this.state.set(key, value);
+        return value;
+      }
+      
+      has(key) {
+        return this.state.has(key);
+      }
+      
+      delete(key) {
+        return this.state.delete(key);
+      }
+      
+      clear() {
+        this.state.clear();
+      }
+    }
+    
+    // Mock MutationManager for demonstration purposes
+    class MockMutationManager {
+      async mutate(mutation, variables) {
+        console.log('Mutation:', mutation, variables);
+        
+        // Simulate API response delay
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        // Return mock data
+        return {
+          data: {
+            success: true
+          }
+        };
+      }
+    }
+    
+    // Mock NotificationSystem for demonstration purposes
+    class MockNotificationSystem {
+      notify(message, type, topic) {
+        console.log(`Notification [${type}] [${topic}]:`, message);
+        
+        // Show notification in UI
+        const notification = document.createElement('div');
+        notification.className = `notification ${type.toLowerCase()}`;
+        notification.textContent = message;
+        
+        document.body.appendChild(notification);
+        
+        // Remove after 3 seconds
+        setTimeout(() => {
+          notification.remove();
+        }, 3000);
+      }
+    }
+    
+    // Mock implementation of ProductManagementDashboard
+    class ProductManagementDashboard {
+      constructor(apiClient, stateManager, mutationManager, notificationSystem) {
+        this.apiClient = apiClient;
+        this.stateManager = stateManager;
+        this.mutationManager = mutationManager;
+        this.notificationSystem = notificationSystem;
+      }
+      
+      async fetchMetrics() {
+        // Return mock metrics
+        return {
+          totalProducts: 25,
+          totalCollections: 8,
+          totalInventoryItems: 75,
+          totalLocations: 3,
+          totalPages: 12,
+          totalArticles: 15,
+          totalMetaobjects: 5,
+          totalFiles: 30,
+          totalMenus: 4,
+          totalApiCalls: 1250,
+          apiCallsToday: 125
+        };
+      }
+      
+      renderDashboardHTML(props, metrics) {
+        const { activeSection = 'products' } = props;
+        
+        // Helper to generate navigation item HTML
+        const navItem = (id, label, count) => `
+          <div class="nav-item ${activeSection === id ? 'active' : ''}" data-section="${id}">
+            <div class="nav-label">${label}</div>
+            <div class="nav-count">${count !== '' ? count : ''}</div>
+          </div>
+        `;
+        
+        return `
+          <div class="product-management-dashboard">
+            <header class="dashboard-header">
+              <h1>Shopify Product Ecosystem Management</h1>
+            </header>
+            
+            <div class="dashboard-content">
+              <nav class="dashboard-nav">
+                ${navItem('products', 'Products', metrics.totalProducts)}
+                ${navItem('collections', 'Collections', metrics.totalCollections)}
+                ${navItem('inventory', 'Inventory', metrics.totalInventoryItems)}
+                ${navItem('content', 'Content', metrics.totalPages + metrics.totalArticles)}
+                ${navItem('metaobjects', 'Metaobjects', metrics.totalMetaobjects)}
+                ${navItem('files', 'Files', metrics.totalFiles)}
+                ${navItem('menus', 'Menus', metrics.totalMenus)}
+                ${navItem('analytics', 'Analytics', metrics.totalApiCalls)}
+              </nav>
+              
+              <main class="dashboard-main">
+                <div class="section-header">
+                  <h2>${this.getSectionTitle(activeSection)}</h2>
+                  <div class="section-actions">
+                    <button class="create-button">Create ${this.getSectionItemName(activeSection)}</button>
+                    <button class="refresh-button">Refresh</button>
+                    <!-- Dual-view toggle -->
+                    <div class="view-mode-toggle">
+                      <button class="tree-view-toggle active">Tree View</button>
+                      <button class="raw-view-toggle">Raw Data</button>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="section-content">
+                  <!-- Dual-view component will be rendered here -->
+                  ${this.renderDualViewPresentation(activeSection)}
+                </div>
+              </main>
+            </div>
+          </div>
+          
+          <style>
+            .product-management-dashboard {
+              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+              max-width: 1200px;
+              margin: 0 auto;
+              padding: 20px;
+              color: #333;
+            }
+            
+            .dashboard-header {
+              margin-bottom: 20px;
+              padding-bottom: 10px;
+              border-bottom: 1px solid #eee;
+            }
+            
+            .dashboard-content {
+              display: flex;
+              gap: 20px;
+            }
+            
+            .dashboard-nav {
+              width: 200px;
+              background-color: #f9fafb;
+              border-radius: 8px;
+              padding: 15px;
+              box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            }
+            
+            .nav-item {
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              padding: 10px;
+              margin-bottom: 5px;
+              border-radius: 4px;
+              cursor: pointer;
+              transition: background-color 0.2s;
+            }
+            
+            .nav-item:hover {
+              background-color: #f1f1f1;
+            }
+            
+            .nav-item.active {
+              background-color: #5c6ac4;
+              color: white;
+            }
+            
+            .nav-count {
+              background-color: rgba(0,0,0,0.1);
+              border-radius: 10px;
+              padding: 2px 8px;
+              font-size: 12px;
+            }
+            
+            .nav-item.active .nav-count {
+              background-color: rgba(255,255,255,0.2);
+            }
+            
+            .dashboard-main {
+              flex: 1;
+              background-color: #fff;
+              border-radius: 8px;
+              padding: 20px;
+              box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            }
+            
+            .section-header {
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              margin-bottom: 20px;
+              padding-bottom: 10px;
+              border-bottom: 1px solid #eee;
+            }
+            
+            .section-actions {
+              display: flex;
+              gap: 10px;
+            }
+            
+            .create-button {
+              background-color: #5c6ac4;
+              color: white;
+              border: none;
+              padding: 8px 15px;
+              border-radius: 4px;
+              cursor: pointer;
+            }
+            
+            .refresh-button {
+              background-color: #f4f6f8;
+              border: 1px solid #ddd;
+              padding: 8px 15px;
+              border-radius: 4px;
+              cursor: pointer;
+            }
+            
+            .loading-placeholder {
+              padding: 40px;
+              text-align: center;
+              color: #637381;
+              background-color: #f9fafb;
+              border-radius: 4px;
+            }
+            
+            /* Dual-view styles */
+            .view-mode-toggle {
+              display: flex;
+              gap: 5px;
+            }
+            
+            .tree-view-toggle, .raw-view-toggle {
+              background-color: #f4f6f8;
+              border: 1px solid #ddd;
+              padding: 8px 15px;
+              border-radius: 4px;
+              cursor: pointer;
+            }
+            
+            .tree-view-toggle.active, .raw-view-toggle.active {
+              background-color: #5c6ac4;
+              color: white;
+              border-color: #5c6ac4;
+            }
+            
+            /* Dual-view component styles */
+            .dual-view-container {
+              display: flex;
+              flex-direction: column;
+              height: 500px;
+              overflow: hidden;
+            }
+            
+            .toggle-controller {
+              display: flex;
+              justify-content: space-between;
+              padding: 10px;
+              border-bottom: 1px solid #eee;
+            }
+            
+            .view-container {
+              flex: 1;
+              overflow: auto;
+            }
+            
+            .tree-view, .raw-data-view {
+              height: 100%;
+              padding: 15px;
+            }
+            
+            .tree-visualization {
+              font-family: monospace;
+              white-space: nowrap;
+              overflow: auto;
+            }
+            
+            .tree-node {
+              cursor: pointer;
+              margin: 2px 0;
+            }
+            
+            .node-expander {
+              display: inline-block;
+              width: 15px;
+              text-align: center;
+              cursor: pointer;
+            }
+            
+            .node-content {
+              display: inline-block;
+            }
+            
+            .node-children {
+              padding-left: 20px;
+            }
+            
+            .hidden {
+              display: none;
+            }
+            
+            .node-type-product {
+              color: #5c6ac4;
+            }
+            
+            .node-type-collection {
+              color: #47c1bf;
+            }
+            
+            .node-type-folder {
+              color: #637381;
+              font-weight: bold;
+            }
+            
+            .raw-data-view {
+              height: 100%;
+              display: flex;
+              flex-direction: column;
+            }
+            
+            .raw-data-header {
+              display: flex;
+              justify-content: space-between;
+              padding: 10px;
+              border-bottom: 1px solid #eee;
+            }
+            
+            .raw-data-content {
+              flex: 1;
+              overflow: auto;
+              margin: 0;
+              padding: 15px;
+              background-color: #f9fafb;
+              border-radius: 4px;
+              font-family: monospace;
+              white-space: pre-wrap;
+            }
+            
+            /* Notification styles */
+            .notification {
+              position: fixed;
+              top: 20px;
+              right: 20px;
+              padding: 15px 20px;
+              border-radius: 4px;
+              color: white;
+              box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+              z-index: 1000;
+              animation: fadeIn 0.3s, fadeOut 0.3s 2.7s;
+            }
+            
+            .notification.info {
+              background-color: #5c6ac4;
+            }
+            
+            .notification.success {
+              background-color: #50b83c;
+            }
+            
+            .notification.warning {
+              background-color: #f49342;
+            }
+            
+            .notification.error {
+              background-color: #de3618;
+            }
+            
+            @keyframes fadeIn {
+              from { opacity: 0; }
+              to { opacity: 1; }
+            }
+            
+            @keyframes fadeOut {
+              from { opacity: 1; }
+              to { opacity: 0; }
+            }
+
+            /* Chart styles */
+            .chart-container {
+              width: 100%;
+              height: 300px;
+              margin-bottom: 20px;
+            }
+
+            /* Analytics dashboard styles */
+            .analytics-dashboard {
+              padding: 10px;
+            }
+            
+            .chart-section {
+              margin-bottom: 30px;
+            }
+            
+            .chart-section h3 {
+              margin-top: 0;
+              margin-bottom: 10px;
+              color: #212b36;
+            }
+            
+            .analytics-summary {
+              display: flex;
+              flex-wrap: wrap;
+              gap: 15px;
+              margin-top: 20px;
+            }
+            
+            .summary-card {
+              flex: 1;
+              min-width: 200px;
+              background-color: #f9fafb;
+              border-radius: 8px;
+              padding: 15px;
+              box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            }
+            
+            .summary-title {
+              font-size: 14px;
+              color: #637381;
+              margin-bottom: 5px;
+            }
+            
+            .summary-value {
+              font-size: 24px;
+              font-weight: 600;
+              color: #212b36;
+            }
+          </style>
+        `;
+      }
+      
+      getSectionTitle(section) {
+        switch (section) {
+          case 'products': return 'Products';
+          case 'collections': return 'Collections';
+          case 'inventory': return 'Inventory Management';
+          case 'content': return 'Content Management';
+          case 'metaobjects': return 'Metaobjects';
+          case 'files': return 'Files';
+          case 'menus': return 'Navigation Menus';
+          case 'analytics': return 'API Usage Analytics';
+          default: return 'Products';
+        }
+      }
+      
+      getSectionItemName(section) {
+        switch (section) {
+          case 'products': return 'Product';
+          case 'collections': return 'Collection';
+          case 'inventory': return 'Transfer';
+          case 'content': return 'Page';
+          case 'metaobjects': return 'Metaobject';
+          case 'files': return 'File';
+          case 'menus': return 'Menu';
+          case 'analytics': return 'Chart';
+          default: return 'Item';
+        }
+      }
+      
+      renderDualViewPresentation(section) {
+        if (section === 'analytics') {
+          return this.renderAnalyticsDashboard();
+        }
+        
+        // Mock implementation of dual-view presentation
+        return `
+          <div class="dual-view-container">
+            <div class="toggle-controller">
+              <div class="view-toggle">
+                <button class="toggle-button tree-view-button active" data-view="tree">
+                  Tree View
+                </button>
+                <button class="toggle-button raw-view-button" data-view="raw">
+                  Raw Data
+                </button>
+              </div>
+              
+              <div class="tree-controls">
+                <button class="expand-all-button">Expand All</button>
+                <button class="collapse-all-button">Collapse All</button>
+              </div>
+            </div>
+            
+            <div class="view-container">
+              <div class="tree-view" style="display: block;">
+                <div class="tree-visualization">
+                  ${this.renderTreeNodes(this.getMockTreeNodes(section))}
+                </div>
+              </div>
+              
+              <div class="raw-data-view" style="display: none;">
+                <div class="raw-data-header">
+                  <div class="format-selector">
+                    <label>
+                      <input type="radio" name="format" value="json" checked>
+                      JSON
+                    </label>
+                    <label>
+                      <input type="radio" name="format" value="yaml">
+                      YAML
+                    </label>
+                  </div>
+                  
+                  <button class="copy-button">Copy</button>
+                </div>
+                
+                <pre class="raw-data-content">${JSON.stringify(this.getMockRawData(section), null, 2)}</pre>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      renderAnalyticsDashboard() {
+        return `
+          <div class="analytics-dashboard">
+            <div class="chart-section">
+              <h3>API Usage Over Time</h3>
+              <div class="chart-container" id="usage-chart">
+                <div class="loading-placeholder">Loading chart...</div>
+              </div>
+            </div>
+            
+            <div class="chart-section">
+              <h3>Request Distribution by Endpoint</h3>
+              <div class="chart-container" id="distribution-chart">
+                <div class="loading-placeholder">Loading chart...</div>
+              </div>
+            </div>
+            
+            <div class="chart-section">
+              <h3>Cost Analysis</h3>
+              <div class="chart-container" id="cost-chart">
+                <div class="loading-placeholder">Loading chart...</div>
+              </div>
+            </div>
+            
+            <div class="chart-section">
+              <h3>Throttling Events</h3>
+              <div class="chart-container" id="throttling-chart">
+                <div class="loading-placeholder">Loading chart...</div>
+              </div>
+            </div>
+            
+            <div class="analytics-summary">
+              <div class="summary-card">
+                <div class="summary-title">Total API Calls</div>
+                <div class="summary-value">1,250</div>
+              </div>
+              <div class="summary-card">
+                <div class="summary-title">Today's API Calls</div>
+                <div class="summary-value">125</div>
+              </div>
+              <div class="summary-card">
+                <div class="summary-title">Throttling Events</div>
+                <div class="summary-value">3</div>
+              </div>
+              <div class="summary-card">
+                <div class="summary-title">Average Response Time</div>
+                <div class="summary-value">245ms</div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+      
+      renderTreeNodes(nodes, level = 0) {
+        if (!nodes || nodes.length === 0) {
+          return '';
+        }
+        
+        return nodes.map((node, index) => {
+          const isLast = index === nodes.length - 1;
+          const hasChildren = node.children && node.children.length > 0;
+          const isExpanded = node.expanded === true;
+          
+          // ASCII characters for the tree structure
+          const prefix = level === 0 ? '' : isLast ? '└── ' : '├── ';
+          
+          // Node expander (+ or -)
+          const expander = hasChildren
+            ? `<span class="node-expander" data-node-id="${node.id}">${isExpanded ? '−' : '+'}</span>`
+            : '<span class="node-expander"></span>';
+          
+          // Node content
+          const content = `<span class="node-content node-type-${node.type}">${node.name}</span>`;
+          
+          // Children
+          const childrenHtml = hasChildren
+            ? `<div class="node-children ${isExpanded ? '' : 'hidden'}">${this.renderTreeNodes(node.children, level + 1)}</div>`
+            : '';
+          
+          return `
+            <div class="tree-node ${hasChildren ? 'has-children' : ''} ${isExpanded ? 'expanded' : ''}" data-node-id="${node.id}">
+              <div class="node-line">
+                ${prefix}${expander}${content}
+              </div>
+              ${childrenHtml}
+            </div>
+          `;
+        }).join('');
+      }
+      
+      getMockTreeNodes(section) {
+        switch (section) {
+          case 'products':
+            return [
+              {
+                id: 'products-root',
+                name: 'Products',
+                type: 'folder',
+                expanded: true,
+                children: [
+                  {
+                    id: 'product1',
+                    name: 'Basic T-Shirt',
+                    type: 'product',
+                    expanded: false,
+                    children: [
+                      {
+                        id: 'variant1',
+                        name: 'Small / Black',
+                        type: 'product'
+                      },
+                      {
+                        id: 'variant2',
+                        name: 'Medium / Black',
+                        type: 'product'
+                      },
+                      {
+                        id: 'variant3',
+                        name: 'Large / Black',
+                        type: 'product'
+                      }
+                    ]
+                  },
+                  {
+                    id: 'product2',
+                    name: 'Premium Hoodie',
+                    type: 'product',
+                    expanded: false,
+                    children: [
+                      {
+                        id: 'variant4',
+                        name: 'Small / Gray',
+                        type: 'product'
+                      },
+                      {
+                        id: 'variant5',
+                        name: 'Medium / Gray',
+                        type: 'product'
+                      }
+                    ]
+                  }
+                ]
+              }
+            ];
+          
+          case 'collections':
+            return [
+              {
+                id: 'collections-root',
+                name: 'Collections',
+                type: 'folder',
+                expanded: true,
+                children: [
+                  {
+                    id: 'collection1',
+                    name: 'Summer Collection',
+                    type: 'collection',
+                    expanded: false,
+                    children: [
+                      {
+                        id: 'product-ref1',
+                        name: 'Basic T-Shirt',
+                        type: 'product'
+                      }
+                    ]
+                  },
+                  {
+                    id: 'collection2',
+                    name: 'Winter Collection',
+                    type: 'collection',
+                    expanded: false,
+                    children: [
+                      {
+                        id: 'product-ref2',
+                        name: 'Premium Hoodie',
+                        type: 'product'
+                      }
+                    ]
+                  }
+                ]
+              }
+            ];
+          
+          default:
+            return [
+              {
+                id: `${section}-root`,
+                name: this.getSectionTitle(section),
+                type: 'folder',
+                expanded: true,
+                children: [
+                  {
+                    id: `${section}-item1`,
+                    name: `${this.getSectionItemName(section)} 1`,
+                    type: section === 'collections' ? 'collection' : 'product',
+                    expanded: false,
+                    children: []
+                  },
+                  {
+                    id: `${section}-item2`,
+                    name: `${this.getSectionItemName(section)} 2`,
+                    type: section === 'collections' ? 'collection' : 'product',
+                    expanded: false,
+                    children: []
+                  }
+                ]
+              }
+            ];
+        }
+      }
+      
+      getMockRawData(section) {
+        switch (section) {
+          case 'products':
+            return {
+              products: {
+                edges: [
+                  {
+                    node: {
+                      id: 'product1',
+                      title: 'Basic T-Shirt',
+                      variants: {
+                        edges: [
+                          {
+                            node: {
+                              id: 'variant1',
+                              title: 'Small / Black'
+                            }
+                          },
+                          {
+                            node: {
+                              id: 'variant2',
+                              title: 'Medium / Black'
+                            }
+                          },
+                          {
+                            node: {
+                              id: 'variant3',
+                              title: 'Large / Black'
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  {
+                    node: {
+                      id: 'product2',
+                      title: 'Premium Hoodie',
+                      variants: {
+                        edges: [
+                          {
+                            node: {
+                              id: 'variant4',
+                              title: 'Small / Gray'
+                            }
+                          },
+                          {
+                            node: {
+                              id: 'variant5',
+                              title: 'Medium / Gray'
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  }
+                ]
+              }
+            };
+          
+          case 'collections':
+            return {
+              collections: {
+                edges: [
+                  {
+                    node: {
+                      id: 'collection1',
+                      title: 'Summer Collection',
+                      products: {
+                        edges: [
+                          {
+                            node: {
+                              id: 'product1',
+                              title: 'Basic T-Shirt'
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  {
+                    node: {
+                      id: 'collection2',
+                      title: 'Winter Collection',
+                      products: {
+                        edges: [
+                          {
+                            node: {
+                              id: 'product2',
+                              title: 'Premium Hoodie'
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  }
+                ]
+              }
+            };
+          
+          default:
+            return {
+              [section]: {
+                edges: [
+                  {
+                    node: {
+                      id: `${section}-item1`,
+                      title: `${this.getSectionItemName(section)} 1`
+                    }
+                  },
+                  {
+                    node: {
+                      id: `${section}-item2`,
+                      title: `${this.getSectionItemName(section)} 2`
+                    }
+                  }
+                ]
+              }
+            };
+        }
+      }
+    }
+    
+    // Initialize the dashboard
+    async function initDashboard() {
+      const container = document.getElementById('dashboard-container');
+      
+      // Create mock dependencies
+      const apiClient = new MockShopifyApiClient();
+      const stateManager = new MockStateManager();
+      const mutationManager = new MockMutationManager();
+      const notificationSystem = new MockNotificationSystem();
+      
+      // Create dashboard
+      const dashboard = new ProductManagementDashboard(
+        apiClient,
+        stateManager,
+        mutationManager,
+        notificationSystem
+      );
+      
+      // Fetch metrics
+      const metrics = await dashboard.fetchMetrics();
+      
+      // Render dashboard
+      container.innerHTML = dashboard.renderDashboardHTML({ activeSection: 'products' }, metrics);
+      
+      // Initialize event listeners
+      initEventListeners(dashboard);
+    }
+    
+    // Initialize event listeners
+    function initEventListeners(dashboard) {
+      const container = document.getElementById('dashboard-container');
+      
+      // Section navigation
+      container.querySelectorAll('.nav-item').forEach(item => {
+        item.addEventListener('click', () => {
+          const section = item.dataset.section;
+          
+          // Update active section
+          container.querySelectorAll('.nav-item').forEach(navItem => {
+            navItem.classList.toggle('active', navItem === item);
+          });
+          
+          // Update section title
+          container.querySelector('.section-header h2').textContent = dashboard.getSectionTitle(section);
+          
+          // Update create button
+          container.querySelector('.create-button').textContent = `Create ${dashboard.getSectionItemName(section)}`;
+          
+          // Update section content
+          container.querySelector('.section-content').innerHTML = dashboard.renderDualViewPresentation(section);
+          
+          // Initialize dual-view event listeners
+          initDualViewEventListeners();
+        });
+      });
+      
+      // Refresh button
+      container.querySelector('.refresh-button').addEventListener('click', () => {
+        const activeSection = container.querySelector('.nav-item.active').dataset.section;
+        container.querySelector('.section-content').innerHTML = dashboard.renderDualViewPresentation(activeSection);
+        initDualViewEventListeners();
+      });
+      
+      // View mode toggle
+      container.querySelectorAll('.view-mode-toggle button').forEach(button => {
+        button.addEventListener('click', () => {
+          // Update active button
+          container.querySelectorAll('.view-mode-toggle button').forEach(btn => {
+            btn.classList.toggle('active', btn === button);
+          });
+          
+          // Get active section
+          const activeSection = container.querySelector('.nav-item.active').dataset.section;
+          
+          // Update toggle buttons in dual-view
+          if (button.classList.contains('tree-view-toggle')) {
+            container.querySelector('.tree-view-button')?.click();
+          } else {
+            container.querySelector('.raw-view-button')?.click();
+          }
+        });
+      });
+      
+      // Initialize dual-view event listeners
+      initDualViewEventListeners();
+    }
+    
+    // Initialize dual-view event listeners
+    function initDualViewEventListeners() {
+      const container = document.getElementById('dashboard-container');
+      
+      // Toggle between tree and raw views
+      container.querySelectorAll('.toggle-button').forEach(button => {
+        button.addEventListener('click', () => {
+          const viewMode = button.dataset.view;
+          
+          // Update active button
+          container.querySelectorAll('.toggle-button').forEach(btn => {
+            btn.classList.toggle('active', btn === button);
+          });
+          
+          // Update view-mode-toggle buttons
+          if (viewMode === 'tree') {
+            container.querySelector('.tree-view-toggle').classList.add('active');
+            container.querySelector('.raw-view-toggle').classList.remove('active');
+          } else {
+            container.querySelector('.tree-view-toggle').classList.remove('active');
+            container.querySelector('.raw-view-toggle').classList.add('active');
+          }
+          
+          // Show/hide views
+          if (viewMode === 'tree') {
+            container.querySelector('.tree-view').style.display = 'block';
+            container.querySelector('.raw-data-view').style.display = 'none';
+          } else {
+            container.querySelector('.tree-view').style.display = 'none';
+            container.querySelector('.raw-data-view').style.display = 'block';
+          }
+        });
+      });
+      
+      // Expand/collapse all nodes
+      container.querySelector('.expand-all-button')?.addEventListener('click', () => {
+        container.querySelectorAll('.tree-node.has-children').forEach(node => {
+          node.classList.add('expanded');
+          node.querySelector('.node-children')?.classList.remove('hidden');
+          const expander = node.querySelector('.node-expander');
+          if (expander) expander.textContent = '−';
+        });
+      });
+      
+      container.querySelector('.collapse-all-button')?.addEventListener('click', () => {
+        container.querySelectorAll('.tree-node.has-children').forEach(node => {
+          node.classList.remove('expanded');
+          node.querySelector('.node-children')?.classList.add('hidden');
+          const expander = node.querySelector('.node-expander');
+          if (expander) expander.textContent = '+';
+        });
+      });
+      
+      // Toggle individual nodes
+      container.querySelectorAll('.node-expander').forEach(expander => {
+        expander.addEventListener('click', (e) => {
+          const node = e.target.closest('.tree-node');
+          const children = node.querySelector('.node-children');
+          
+          if (node.classList.contains('expanded')) {
+            node.classList.remove('expanded');
+            children?.classList.add('hidden');
+            e.target.textContent = '+';
+          } else {
+            node.classList.add('expanded');
+            children?.classList.remove('hidden');
+            e.target.textContent = '−';
+          }
+          
+          e.stopPropagation();
+        });
+      });
+      
+      // Format selector
+      container.querySelectorAll('input[name="format"]').forEach(radio => {
+        radio.addEventListener('change', () => {
+          // In a real implementation, this would update the format
+          console.log('Format changed to:', radio.value);
+        });
+      });
+      
+      // Copy button
+      container.querySelector('.copy-button')?.addEventListener('click', () => {
+        const content = container.querySelector('.raw-data-content')?.textContent || '';
+        
+        // Copy to clipboard
+        navigator.clipboard.writeText(content).then(() => {
+          // Show notification
+          const notification = document.createElement('div');
+          notification.className = 'notification success';
+          notification.textContent = 'Copied to clipboard!';
+          
+          document.body.appendChild(notification);
+          
+          // Remove after 3 seconds
+          setTimeout(() => {
+            notification.remove();
+          }, 3000);
+        });
+      });
+    }
+    
+    // Initialize the dashboard when the DOM is loaded
+    document.addEventListener('DOMContentLoaded', initDashboard);
+  </script>
+</body>
+</html>

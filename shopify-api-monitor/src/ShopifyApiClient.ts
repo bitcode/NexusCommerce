@@ -5,6 +5,8 @@
  */
 
 import { GraphQLClient, RequestDocument, Variables } from 'graphql-request';
+import { ShopifyConfig } from './types/ShopifyConfig';
+import ConfigManager from './ConfigManager';
 
 export interface ShopifyThrottleStatus {
   maximumAvailable: number;
@@ -27,12 +29,45 @@ export interface ShopifyApiResponse<T = any> {
 }
 
 export interface ShopifyApiClientOptions {
-  shop: string;
-  accessToken: string;
+  /**
+   * Shopify store domain (e.g., 'your-store.myshopify.com')
+   * Can be loaded from environment via ConfigManager
+   */
+  shop?: string;
+  
+  /**
+   * Shopify access token for API authentication
+   * Can be loaded from environment via ConfigManager
+   */
+  accessToken?: string;
+  
+  /**
+   * Shopify API version (e.g., '2025-04')
+   * Can be loaded from environment via ConfigManager
+   */
   apiVersion?: string;
+  
+  /**
+   * Shopify plan type (affects rate limits)
+   * Can be loaded from environment via ConfigManager
+   */
   plan?: 'standard' | 'advanced' | 'plus' | 'enterprise';
+  
+  /**
+   * Callback when rate limit is approaching threshold
+   */
   onRateLimitApproaching?: (status: ShopifyThrottleStatus) => void;
+  
+  /**
+   * Callback when request is throttled
+   */
   onThrottled?: (status: ShopifyThrottleStatus) => void;
+  
+  /**
+   * Use environment variables from ConfigManager
+   * @default true
+   */
+  useEnvConfig?: boolean;
 }
 
 export class ShopifyApiClient {
@@ -49,15 +84,56 @@ export class ShopifyApiClient {
   };
 
   constructor(private options: ShopifyApiClientOptions) {
-    const apiVersion = options.apiVersion || '2023-10';
-    this.plan = options.plan || 'standard';
+    // Load configuration from environment if enabled
+    let shop: string;
+    let accessToken: string;
+    let apiVersion: string;
+    let plan: ShopifyApiClientOptions['plan'];
+    
+    if (options.useEnvConfig !== false) {
+      // Get config from ConfigManager
+      const config = ConfigManager.getConfig();
+      
+      // Use options if provided, otherwise use config values
+      shop = options.shop || config.shop || '';
+      accessToken = options.accessToken || config.accessToken || '';
+      apiVersion = options.apiVersion || config.apiVersion || '2023-10';
+      plan = options.plan || (config.plan as ShopifyApiClientOptions['plan']) || 'standard';
+      
+      // Validate required fields
+      if (!shop) {
+        throw new Error('Missing required configuration: shop. Provide it in options or .env file.');
+      }
+      
+      if (!accessToken) {
+        throw new Error('Missing required configuration: accessToken. Provide it in options or .env file.');
+      }
+    } else {
+      // Use only the provided options
+      shop = options.shop || '';
+      accessToken = options.accessToken || '';
+      apiVersion = options.apiVersion || '2023-10';
+      plan = options.plan || 'standard';
+      
+      // Validate required fields
+      if (!shop) {
+        throw new Error('Missing required option: shop');
+      }
+      
+      if (!accessToken) {
+        throw new Error('Missing required option: accessToken');
+      }
+    }
+    
+    this.plan = plan;
     this.onRateLimitApproaching = options.onRateLimitApproaching;
     this.onThrottled = options.onThrottled;
+    
     this.client = new GraphQLClient(
-      `https://${options.shop}/admin/api/${apiVersion}/graphql.json`,
+      `https://${shop}/admin/api/${apiVersion}/graphql.json`,
       {
         headers: {
-          'X-Shopify-Access-Token': options.accessToken,
+          'X-Shopify-Access-Token': accessToken,
           'Content-Type': 'application/json',
         },
       }

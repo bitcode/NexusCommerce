@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dual-View Data Presentation Example</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f6f8;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    .header {
+      background-color: #ffffff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      margin-bottom: 20px;
+    }
+    
+    .content {
+      background-color: #ffffff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      height: 600px;
+    }
+    
+    h1 {
+      margin-top: 0;
+      color: #212b36;
+    }
+    
+    p {
+      color: #637381;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Dual-View Data Presentation Example</h1>
+      <p>This example demonstrates the dual-view data presentation system, which provides both a tree visualization and raw data view of hierarchical data.</p>
+    </div>
+    
+    <div class="content" id="dual-view-container">
+      <!-- The dual-view presentation will be rendered here -->
+    </div>
+  </div>
+  
+  <script>
+    // Sample data
+    const sampleData = {
+      products: {
+        edges: [
+          {
+            node: {
+              id: 'product1',
+              title: 'Basic T-Shirt',
+              variants: {
+                edges: [
+                  {
+                    node: {
+                      id: 'variant1',
+                      title: 'Small / Black'
+                    }
+                  },
+                  {
+                    node: {
+                      id: 'variant2',
+                      title: 'Medium / Black'
+                    }
+                  },
+                  {
+                    node: {
+                      id: 'variant3',
+                      title: 'Large / Black'
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          {
+            node: {
+              id: 'product2',
+              title: 'Premium Hoodie',
+              variants: {
+                edges: [
+                  {
+                    node: {
+                      id: 'variant4',
+                      title: 'Small / Gray'
+                    }
+                  },
+                  {
+                    node: {
+                      id: 'variant5',
+                      title: 'Medium / Gray'
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      collections: {
+        edges: [
+          {
+            node: {
+              id: 'collection1',
+              title: 'Summer Collection',
+              products: {
+                edges: [
+                  {
+                    node: {
+                      id: 'product1'
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          {
+            node: {
+              id: 'collection2',
+              title: 'Winter Collection',
+              products: {
+                edges: [
+                  {
+                    node: {
+                      id: 'product2'
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    };
+    
+    // Transform data to TreeNode structure
+    function transformToTreeNodes(data) {
+      const nodes = [];
+      
+      // Products
+      if (data.products && data.products.edges) {
+        const productsNode = {
+          id: 'products-root',
+          name: 'Products',
+          type: 'folder',
+          expanded: true,
+          children: []
+        };
+        
+        data.products.edges.forEach(edge => {
+          const product = edge.node;
+          const productNode = {
+            id: product.id,
+            name: product.title,
+            type: 'product',
+            expanded: false,
+            children: []
+          };
+          
+          if (product.variants && product.variants.edges) {
+            product.variants.edges.forEach(variantEdge => {
+              const variant = variantEdge.node;
+              productNode.children.push({
+                id: variant.id,
+                name: variant.title,
+                type: 'product'
+              });
+            });
+          }
+          
+          productsNode.children.push(productNode);
+        });
+        
+        nodes.push(productsNode);
+      }
+      
+      // Collections
+      if (data.collections && data.collections.edges) {
+        const collectionsNode = {
+          id: 'collections-root',
+          name: 'Collections',
+          type: 'folder',
+          expanded: true,
+          children: []
+        };
+        
+        data.collections.edges.forEach(edge => {
+          const collection = edge.node;
+          const collectionNode = {
+            id: collection.id,
+            name: collection.title,
+            type: 'collection',
+            expanded: false,
+            children: []
+          };
+          
+          if (collection.products && collection.products.edges) {
+            collection.products.edges.forEach(productEdge => {
+              const product = productEdge.node;
+              collectionNode.children.push({
+                id: product.id,
+                name: 'Product Reference',
+                type: 'product',
+                relationships: [
+                  {
+                    id: product.id,
+                    type: 'reference',
+                    direction: 'to'
+                  }
+                ]
+              });
+            });
+          }
+          
+          collectionsNode.children.push(collectionNode);
+        });
+        
+        nodes.push(collectionsNode);
+      }
+      
+      return nodes;
+    }
+    
+    // Render the dual-view presentation
+    document.addEventListener('DOMContentLoaded', () => {
+      // In a real implementation, this would be done by importing and using the actual components
+      // For this example, we'll simulate the rendering with HTML
+      
+      const container = document.getElementById('dual-view-container');
+      const nodes = transformToTreeNodes(sampleData);
+      
+      container.innerHTML = `
+        <div class="dual-view-container">
+          <div class="toggle-controller">
+            <div class="view-toggle">
+              <button class="toggle-button tree-view-button active" data-view="tree">
+                Tree View
+              </button>
+              <button class="toggle-button raw-view-button" data-view="raw">
+                Raw Data
+              </button>
+            </div>
+            
+            <div class="tree-controls">
+              <button class="expand-all-button">Expand All</button>
+              <button class="collapse-all-button">Collapse All</button>
+            </div>
+          </div>
+          
+          <div class="view-container">
+            <div class="tree-view" style="display: block;">
+              <div class="tree-visualization">
+                ${renderTreeNodes(nodes, 0)}
+              </div>
+            </div>
+            
+            <div class="raw-data-view" style="display: none;">
+              <div class="raw-data-header">
+                <div class="format-selector">
+                  <label>
+                    <input type="radio" name="format" value="json" checked>
+                    JSON
+                  </label>
+                  <label>
+                    <input type="radio" name="format" value="yaml">
+                    YAML
+                  </label>
+                </div>
+                
+                <button class="copy-button">Copy</button>
+              </div>
+              
+              <pre class="raw-data-content">${JSON.stringify(sampleData, null, 2)}</pre>
+            </div>
+          </div>
+        </div>
+        
+        <style>
+          .dual-view-container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow: hidden;
+          }
+          
+          .toggle-controller {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+          }
+          
+          .view-toggle {
+            display: flex;
+            gap: 10px;
+          }
+          
+          .toggle-button {
+            background-color: #f4f6f8;
+            border: 1px solid #ddd;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+          }
+          
+          .toggle-button.active {
+            background-color: #5c6ac4;
+            color: white;
+            border-color: #5c6ac4;
+          }
+          
+          .tree-controls {
+            display: flex;
+            gap: 10px;
+          }
+          
+          .expand-all-button, .collapse-all-button {
+            background-color: #f4f6f8;
+            border: 1px solid #ddd;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+          }
+          
+          .view-container {
+            flex: 1;
+            overflow: auto;
+          }
+          
+          .tree-view, .raw-data-view {
+            height: 100%;
+            padding: 15px;
+          }
+          
+          .tree-visualization {
+            font-family: monospace;
+            white-space: nowrap;
+            overflow: auto;
+          }
+          
+          .tree-node {
+            cursor: pointer;
+            margin: 2px 0;
+          }
+          
+          .node-expander {
+            display: inline-block;
+            width: 15px;
+            text-align: center;
+            cursor: pointer;
+          }
+          
+          .node-content {
+            display: inline-block;
+          }
+          
+          .node-children {
+            padding-left: 20px;
+          }
+          
+          .hidden {
+            display: none;
+          }
+          
+          .node-type-product {
+            color: #5c6ac4;
+          }
+          
+          .node-type-collection {
+            color: #47c1bf;
+          }
+          
+          .node-type-folder {
+            color: #637381;
+            font-weight: bold;
+          }
+          
+          .relationship-indicator {
+            display: inline-block;
+            margin-left: 5px;
+            font-size: 0.8em;
+            color: #919eab;
+          }
+          
+          .raw-data-view {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+          }
+          
+          .raw-data-header {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+          }
+          
+          .format-selector {
+            display: flex;
+            gap: 10px;
+          }
+          
+          .copy-button {
+            background-color: #f4f6f8;
+            border: 1px solid #ddd;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+          }
+          
+          .raw-data-content {
+            flex: 1;
+            overflow: auto;
+            margin: 0;
+            padding: 15px;
+            background-color: #f9fafb;
+            border-radius: 4px;
+            font-family: monospace;
+            white-space: pre-wrap;
+          }
+        </style>
+      `;
+      
+      // Initialize client-side functionality
+      initializeDualView();
+    });
+    
+    // Render tree nodes recursively
+    function renderTreeNodes(nodes, level) {
+      if (!nodes || nodes.length === 0) {
+        return '';
+      }
+      
+      return nodes.map((node, index) => {
+        const isLast = index === nodes.length - 1;
+        const hasChildren = node.children && node.children.length > 0;
+        const isExpanded = node.expanded === true;
+        
+        // ASCII characters for the tree structure
+        const prefix = level === 0 ? '' : isLast ? '└── ' : '├── ';
+        
+        // Node expander (+ or -)
+        const expander = hasChildren
+          ? `<span class="node-expander" data-node-id="${node.id}">${isExpanded ? '−' : '+'}</span>`
+          : '<span class="node-expander"></span>';
+        
+        // Node content
+        const content = `<span class="node-content node-type-${node.type}">${node.name}</span>`;
+        
+        // Relationship indicator
+        const relationshipIndicator = node.relationships && node.relationships.length > 0
+          ? `<span class="relationship-indicator">[${node.relationships.length} rel]</span>`
+          : '';
+        
+        // Children
+        const childrenHtml = hasChildren
+          ? `<div class="node-children ${isExpanded ? '' : 'hidden'}">${renderTreeNodes(node.children, level + 1)}</div>`
+          : '';
+        
+        return `
+          <div class="tree-node ${hasChildren ? 'has-children' : ''} ${isExpanded ? 'expanded' : ''}" data-node-id="${node.id}">
+            <div class="node-line">
+              ${prefix}${expander}${content}${relationshipIndicator}
+            </div>
+            ${childrenHtml}
+          </div>
+        `;
+      }).join('');
+    }
+    
+    // Initialize client-side functionality
+    function initializeDualView() {
+      // Toggle between tree and raw views
+      document.querySelectorAll('.toggle-button').forEach(button => {
+        button.addEventListener('click', (e) => {
+          const target = e.target;
+          const viewMode = target.dataset.view;
+          
+          // Update active button
+          document.querySelectorAll('.toggle-button').forEach(btn => {
+            btn.classList.remove('active');
+          });
+          target.classList.add('active');
+          
+          // Show/hide views
+          if (viewMode === 'tree') {
+            document.querySelector('.tree-view').style.display = 'block';
+            document.querySelector('.raw-data-view').style.display = 'none';
+          } else {
+            document.querySelector('.tree-view').style.display = 'none';
+            document.querySelector('.raw-data-view').style.display = 'block';
+          }
+        });
+      });
+      
+      // Expand/collapse all nodes
+      document.querySelector('.expand-all-button')?.addEventListener('click', () => {
+        document.querySelectorAll('.tree-node.has-children').forEach(node => {
+          node.classList.add('expanded');
+          node.querySelector('.node-children')?.classList.remove('hidden');
+          const expander = node.querySelector('.node-expander');
+          if (expander) expander.textContent = '−';
+        });
+      });
+      
+      document.querySelector('.collapse-all-button')?.addEventListener('click', () => {
+        document.querySelectorAll('.tree-node.has-children').forEach(node => {
+          node.classList.remove('expanded');
+          node.querySelector('.node-children')?.classList.add('hidden');
+          const expander = node.querySelector('.node-expander');
+          if (expander) expander.textContent = '+';
+        });
+      });
+      
+      // Toggle individual nodes
+      document.querySelectorAll('.node-expander').forEach(expander => {
+        expander.addEventListener('click', (e) => {
+          const target = e.target;
+          const node = target.closest('.tree-node');
+          const children = node.querySelector('.node-children');
+          
+          if (node.classList.contains('expanded')) {
+            node.classList.remove('expanded');
+            children?.classList.add('hidden');
+            target.textContent = '+';
+          } else {
+            node.classList.add('expanded');
+            children?.classList.remove('hidden');
+            target.textContent = '−';
+          }
+          
+          e.stopPropagation();
+        });
+      });
+      
+      // Copy raw data
+      document.querySelector('.copy-button')?.addEventListener('click', () => {
+        const content = document.querySelector('.raw-data-content')?.textContent || '';
+        navigator.clipboard.writeText(content).then(() => {
+          alert('Copied to clipboard!');
+        });
+      });
+      
+      // Format selector
+      document.querySelectorAll('input[name="format"]').forEach(radio => {
+        radio.addEventListener('change', (e) => {
+          const target = e.target;
+          const format = target.value;
+          const content = document.querySelector('.raw-data-content');
+          
+          if (format === 'json') {
+            content.textContent = JSON.stringify(sampleData, null, 2);
+          } else {
+            // In a real implementation, this would convert to YAML
+            // For this example, we'll just use JSON
+            content.textContent = JSON.stringify(sampleData, null, 2);
+          }
+        });
+      });
+    }
+  </script>
+</body>
+</html>

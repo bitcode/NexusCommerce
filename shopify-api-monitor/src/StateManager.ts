@@ -9,6 +9,7 @@
  */
 
 import { ShopifyApiClient, ShopifyApiResponse } from './ShopifyApiClient';
+import { ConfigManager } from './ConfigManager';
 
 /**
  * Cache entry with metadata for intelligent refresh
@@ -98,23 +99,73 @@ export class StateManager {
 
   /**
    * Creates a new StateManager
+   * Configuration can be provided directly or loaded from environment variables:
+   * - STATE_MANAGER_DEFAULT_TTL: Default TTL in milliseconds
+   * - STATE_MANAGER_MAX_ENTRIES: Maximum cache entries
+   * - STATE_MANAGER_PERSIST_CACHE: Whether to persist cache (true/false)
+   * - STATE_MANAGER_STORAGE_KEY: Storage key for persisted cache
+   * - STATE_MANAGER_SANITIZE_DATA: Whether to sanitize data (true/false)
+   * - STATE_MANAGER_CONFIG_TTL: TTL for CONFIG category
+   * - STATE_MANAGER_OPERATIONAL_TTL: TTL for OPERATIONAL category
+   * - STATE_MANAGER_ANALYTICS_TTL: TTL for ANALYTICS category
+   * - STATE_MANAGER_TEMPORARY_TTL: TTL for TEMPORARY category
    */
   constructor(apiClient: ShopifyApiClient, config?: Partial<CacheConfig>) {
     this.apiClient = apiClient;
+    
+    // Get environment variables from ConfigManager
+    const configManager = ConfigManager.getInstance();
+    
+    // Load configuration from environment variables if available
+    const defaultTTL = process.env.STATE_MANAGER_DEFAULT_TTL 
+      ? parseInt(process.env.STATE_MANAGER_DEFAULT_TTL, 10) 
+      : 300000; // 5 minutes
+    
+    const maxEntries = process.env.STATE_MANAGER_MAX_ENTRIES 
+      ? parseInt(process.env.STATE_MANAGER_MAX_ENTRIES, 10) 
+      : 1000;
+    
+    const persistCache = process.env.STATE_MANAGER_PERSIST_CACHE 
+      ? process.env.STATE_MANAGER_PERSIST_CACHE === 'true' 
+      : true;
+    
+    const storageKey = process.env.STATE_MANAGER_STORAGE_KEY 
+      || 'shopify-api-state-cache';
+    
+    const sanitizeData = process.env.STATE_MANAGER_SANITIZE_DATA 
+      ? process.env.STATE_MANAGER_SANITIZE_DATA === 'true' 
+      : true;
+    
+    // Merge environment variables with provided config
     this.config = {
-      defaultTTL: 300000, // 5 minutes
-      maxEntries: 1000,
-      persistCache: true,
-      storageKey: 'shopify-api-state-cache',
-      sanitizeData: true,
-      ...config
+      defaultTTL,
+      maxEntries,
+      persistCache,
+      storageKey,
+      sanitizeData,
+      ...config // Direct config overrides environment variables
     };
 
-    // Set default TTLs by category
-    this.categoryTTLs.set(DataCategory.CONFIG, 86400000); // 24 hours
-    this.categoryTTLs.set(DataCategory.OPERATIONAL, 300000); // 5 minutes
-    this.categoryTTLs.set(DataCategory.ANALYTICS, 3600000); // 1 hour
-    this.categoryTTLs.set(DataCategory.TEMPORARY, 60000); // 1 minute
+    // Set default TTLs by category, using environment variables if available
+    this.categoryTTLs.set(
+      DataCategory.CONFIG, 
+      process.env.STATE_MANAGER_CONFIG_TTL ? parseInt(process.env.STATE_MANAGER_CONFIG_TTL, 10) : 86400000
+    ); // 24 hours
+    
+    this.categoryTTLs.set(
+      DataCategory.OPERATIONAL, 
+      process.env.STATE_MANAGER_OPERATIONAL_TTL ? parseInt(process.env.STATE_MANAGER_OPERATIONAL_TTL, 10) : 300000
+    ); // 5 minutes
+    
+    this.categoryTTLs.set(
+      DataCategory.ANALYTICS, 
+      process.env.STATE_MANAGER_ANALYTICS_TTL ? parseInt(process.env.STATE_MANAGER_ANALYTICS_TTL, 10) : 3600000
+    ); // 1 hour
+    
+    this.categoryTTLs.set(
+      DataCategory.TEMPORARY, 
+      process.env.STATE_MANAGER_TEMPORARY_TTL ? parseInt(process.env.STATE_MANAGER_TEMPORARY_TTL, 10) : 60000
+    ); // 1 minute
 
     // Load cache from storage if enabled
     if (this.config.persistCache) {

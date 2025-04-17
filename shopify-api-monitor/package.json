@@ -1,55 +1,44 @@
 {
   "name": "shopify-api-monitor",
   "version": "1.0.0",
-  "description": "Real-time monitoring and management of Shopify API usage with rate limit tracking, analytics, and notifications",
+  "description": "A comprehensive Node.js/TypeScript library for real-time monitoring and management of Shopify API usage",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
     "test": "jest",
-    "lint": "eslint src --ext .ts",
-    "prepare": "npm run build",
-    "start": "ts-node src/index.ts",
-    "dev": "ts-node-dev --respawn src/index.ts",
-    "dashboard": "ts-node examples/dashboard-example.ts"
+    "lint": "eslint src/**/*.ts",
+    "start": "node dist/index.js"
   },
   "keywords": [
     "shopify",
     "api",
-    "rate-limit",
     "monitoring",
-    "analytics",
-    "graphql",
-    "throttling"
+    "rate-limit",
+    "dashboard"
   ],
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "@shopify/shopify-api": "^7.0.0",
-    "graphql-request": "^5.0.0",
+    "d3": "^7.9.0",
+    "graphql": "^16.8.1",
+    "graphql-request": "^6.1.0",
     "uuid": "^11.1.0"
   },
   "devDependencies": {
-    "@types/node": "^18.19.86",
+    "@types/d3": "^7.4.3",
+    "@types/jest": "^29.5.14",
+    "@types/node": "^20.17.30",
     "@types/uuid": "^10.0.0",
-    "ts-node": "^10.9.1",
-    "ts-node-dev": "^2.0.0",
-    "typescript": "^5.0.0"
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.2",
+    "typescript": "^5.4.2"
   },
-  "files": [
-    "dist",
-    "README.md",
-    "LICENSE"
-  ],
-  "engines": {
-    "node": ">=14.0.0"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/yourusername/shopify-api-monitor.git"
-  },
-  "bugs": {
-    "url": "https://github.com/yourusername/shopify-api-monitor/issues"
-  },
-  "homepage": "https://github.com/yourusername/shopify-api-monitor#readme"
+  "jest": {
+    "preset": "ts-jest",
+    "testEnvironment": "node",
+    "testMatch": [
+      "**/__tests__/**/*.test.ts"
+    ]
+  }
 }
